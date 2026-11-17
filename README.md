@@ -38,6 +38,31 @@ Rajib Connect consists of two main components:
 | HTTP communication | Python Requests |
 | Version control | Git, GitHub |
 
+
+## Application Screenshots
+
+### Web Application
+
+**Dashboard**
+
+![Rajib Connect Dashboard](Screenshots/dashboard.png)
+
+**Customer Management**
+
+![Customer Management](Screenshots/customers.png)
+
+**Lead Management**
+
+![Lead Management](Screenshots/leads.png)
+
+### Desktop Application
+
+**Python Desktop CRM**
+
+![Rajib Connect Desktop Client](Screenshots/desktop-client.png)
+
+
+
 ## Architecture
 
 ```text
