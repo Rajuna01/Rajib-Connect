@@ -65,6 +65,8 @@ Rajib Connect consists of two main components:
 
 ## Architecture
 
+For a detailed explanation of the system components, authentication flow, and data access layer, see the [System Architecture Documentation](Documentation/Architecture.md).
+
 ```text
                   RAJIB CONNECT CRM
                           |
