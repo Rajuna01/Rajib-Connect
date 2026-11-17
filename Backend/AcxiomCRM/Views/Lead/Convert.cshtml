@@ -1,0 +1,120 @@
+
+@model AcxiomCRM.ViewModels.LeadConversionViewModel
+
+@{
+    ViewData["Title"] = "Convert Lead";
+}
+
+<div class="container mt-4">
+
+    <h2>Convert Qualified Lead</h2>
+    <p class="text-muted">
+        Create a Customer and an Opportunity from this lead.
+    </p>
+
+    <div class="card shadow-sm p-4 mt-3">
+
+        <h5>Lead Information</h5>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Lead Name:</strong> @Model.LeadName
+            </div>
+
+            <div class="col-md-6">
+                <strong>Company:</strong> @Model.CompanyName
+            </div>
+
+            <div class="col-md-6 mt-2">
+                <strong>Email:</strong> @Model.Email
+            </div>
+
+            <div class="col-md-6 mt-2">
+                <strong>Phone:</strong> @Model.Phone
+            </div>
+        </div>
+
+        <hr />
+
+        <h5>Opportunity Information</h5>
+
+        <form asp-action="Convert"
+              asp-route-id="@Model.LeadId"
+              method="post">
+
+            <input type="hidden" asp-for="LeadId" />
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="OpportunityName"
+                       class="form-label">Opportunity Name</label>
+
+                <input asp-for="OpportunityName"
+                       class="form-control" />
+
+                <span asp-validation-for="OpportunityName"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Amount"
+                       class="form-label">Opportunity Amount (₹)</label>
+
+                <input asp-for="Amount"
+                       type="number"
+                       min="0.01"
+                       step="0.01"
+                       class="form-control" />
+
+                <span asp-validation-for="Amount"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Probability"
+                       class="form-label">Probability (%)</label>
+
+                <input asp-for="Probability"
+                       type="number"
+                       min="0"
+                       max="100"
+                       class="form-control" />
+
+                <span asp-validation-for="Probability"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ExpectedCloseDate"
+                       class="form-label">Expected Close Date</label>
+
+                <input asp-for="ExpectedCloseDate"
+                       type="date"
+                       class="form-control" />
+
+                <span asp-validation-for="ExpectedCloseDate"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="alert alert-info">
+                The new Customer and Opportunity will inherit the
+                Sales Executive assigned to this lead.
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Convert Lead
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">
+                Cancel
+            </a>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

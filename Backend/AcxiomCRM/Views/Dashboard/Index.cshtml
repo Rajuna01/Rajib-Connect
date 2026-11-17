@@ -1,0 +1,550 @@
+
+@model AcxiomCRM.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- WELCOME SECTION -->
+    <div class="welcome-panel p-4 mb-4 rounded-4 text-white">
+        <h2 class="fw-bold mb-2">Welcome to Rajib Connect</h2>
+        <p class="mb-2">Your centralized Customer Relationship Management System.</p>
+        <span class="small">Logged in as: @ViewBag.Role</span>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Customers</div>
+                    <h2 class="fw-bold text-primary mt-2">@Model.TotalCustomers</h2>
+                    <span class="small text-muted">Customer records</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Leads</div>
+                    <h2 class="fw-bold text-success mt-2">@Model.TotalLeads</h2>
+                    <span class="small text-muted">Registered leads</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Open Opportunities</div>
+                    <h2 class="fw-bold text-warning mt-2">@Model.OpenOpportunities</h2>
+                    <span class="small text-muted">Active sales opportunities</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Pipeline Value</div>
+                    <h2 class="fw-bold text-info mt-2">
+                        ₹@Model.PipelineValue.ToString("N2")
+                    </h2>
+                    <span class="small text-muted">Total open opportunity value</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- WEIGHTED PIPELINE -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-6">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Weighted Pipeline</div>
+                    <h3 class="fw-bold text-success mt-2">
+                        ₹@Model.WeightedPipeline.ToString("N2")
+                    </h3>
+                    <p class="small text-muted mb-0">
+                        Opportunity amount multiplied by probability.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row g-4 mb-4">
+
+        <!-- LEAD CHART -->
+        <div class="col-12 col-lg-5">
+            <div class="card dashboard-card h-100">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h5 class="fw-bold">Lead Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="leadChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPPORTUNITY CHART -->
+        <div class="col-12 col-lg-7">
+            <div class="card dashboard-card h-100">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h5 class="fw-bold">Opportunity Stage Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="opportunityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RECENT LEADS -->
+    <div class="card dashboard-card mb-4">
+        <div class="card-header bg-white border-0 p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">Recent Leads</h5>
+                <a asp-controller="Lead"
+                   asp-action="Index"
+                   class="btn btn-sm btn-outline-primary">
+                    View All
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Lead Code</th>
+                            <th>Lead Name</th>
+                            <th>Company</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.RecentLeads.Any())
+                        {
+                            @foreach (var lead in Model.RecentLeads)
+                            {
+                                <tr>
+                                    <td class="ps-3">@lead.LeadCode</td>
+                                    <td class="fw-semibold">@lead.LeadName</td>
+                                    <td>@lead.CompanyName</td>
+                                    <td>
+                                        @switch (lead.Status)
+                                        {
+                                            case "New":
+                                                <span class="badge bg-primary">New</span>
+                                                break;
+                                            case "Contacted":
+                                                <span class="badge bg-info text-dark">Contacted</span>
+                                                break;
+                                            case "Qualified":
+                                                <span class="badge bg-success">Qualified</span>
+                                                break;
+                                            case "Unqualified":
+                                                <span class="badge bg-secondary">Unqualified</span>
+                                                break;
+                                            case "Converted":
+                                                <span class="badge bg-dark">Converted</span>
+                                                break;
+                                            case "Lost":
+                                                <span class="badge bg-danger">Lost</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-secondary">@lead.Status</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>@lead.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No leads available.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="mb-4">
+        <h4 class="fw-bold mb-3">Quick Actions</h4>
+
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a asp-controller="Customer" asp-action="Create"
+                   class="btn btn-primary w-100 py-3">
+                    + Add Customer
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a asp-controller="Lead" asp-action="Create"
+                   class="btn btn-success w-100 py-3">
+                    + Add Lead
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a asp-controller="Opportunity" asp-action="Create"
+                   class="btn btn-warning w-100 py-3">
+                    + Add Opportunity
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a asp-controller="Opportunity" asp-action="Index"
+                   class="btn btn-outline-primary w-100 py-3">
+                    View Opportunities
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRM MODULES -->
+    <div class="mb-4">
+        <h4 class="fw-bold mb-3">CRM Modules</h4>
+
+        <div class="row g-4">
+
+            <!-- AUTHENTICATION -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">🔐</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">Authentication & Roles</h5>
+                    <p class="text-muted small mb-0">
+                        Secure login, authentication and role-based access.
+                    </p>
+                </div>
+            </div>
+
+            <!-- USER MANAGEMENT -->
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a asp-controller="UserManagement"
+                       asp-action="Index"
+                       class="module-card">
+                        <div class="d-flex justify-content-between">
+                            <div class="module-icon">👥</div>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <h5 class="fw-bold mt-2">User Management</h5>
+                        <p class="text-muted small mb-0">
+                            Create users, assign roles and manage accounts.
+                        </p>
+                    </a>
+                </div>
+            }
+
+            <!-- CUSTOMER MANAGEMENT -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a asp-controller="Customer" asp-action="Index"
+                   class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">🏢</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">Customer Management</h5>
+                    <p class="text-muted small mb-0">
+                        Create, update, search and manage customer information.
+                    </p>
+                </a>
+            </div>
+
+            <!-- LEAD MANAGEMENT -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a asp-controller="Lead" asp-action="Index"
+                   class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">🎯</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">Lead Management</h5>
+                    <p class="text-muted small mb-0">
+                        Track potential customers, lead sources and conversions.
+                    </p>
+                </a>
+            </div>
+
+            <!-- OPPORTUNITY MANAGEMENT -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a asp-controller="Opportunity" asp-action="Index"
+                   class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">📈</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">Opportunity Management</h5>
+                    <p class="text-muted small mb-3">
+                        Create, manage and track sales opportunities,
+                        monitor deal stages, probability and expected revenue.
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small fw-semibold text-primary">
+                            Manage Opportunities
+                        </span>
+                        <span class="text-primary">→</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- FOLLOW-UP MANAGEMENT -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a asp-controller="FollowUp" asp-action="Index"
+                   class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">📅</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">Follow-up Management</h5>
+                    <p class="text-muted small mb-3">
+                        Schedule customer and lead follow-ups, track planned
+                        interactions, monitor overdue tasks and update follow-up status.
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small fw-semibold text-primary">
+                            Manage Follow-ups
+                        </span>
+                        <span class="text-primary">→</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- ACTIVITY MANAGEMENT -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a asp-controller="Activity" asp-action="Index"
+                   class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">📝</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">Activity Management</h5>
+                    <p class="text-muted small mb-3">
+                        Record and manage calls, meetings, emails and tasks.
+                        Track customer interactions and monitor activity status.
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small fw-semibold text-primary">
+                            Manage Activities
+                        </span>
+                        <span class="text-primary">→</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- AUDIT LOGS -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a asp-controller="AuditLog"
+                   asp-action="Index"
+                   class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">📋</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">Audit Logs</h5>
+                    <p class="text-muted small mb-3">
+                        Monitor user actions, record changes and system activities.
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small fw-semibold text-primary">View Audit Logs</span>
+                        <span class="text-primary">→</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- REPORTS & ANALYTICS -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a asp-controller="Reports"
+                   asp-action="Index"
+                   class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">📊</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">Reports & Analytics</h5>
+                    <p class="text-muted small mb-3">
+                        Analyze customer, lead, opportunity and sales performance.
+                        View analytics, performance metrics and export reports.
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small fw-semibold text-primary">
+                            View Reports
+                        </span>
+                        <span class="text-primary">→</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- REST API -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a href="/swagger/index.html"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="module-card">
+                    <div class="d-flex justify-content-between">
+                        <div class="module-icon">⚙️</div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <h5 class="fw-bold mt-2">REST API</h5>
+                    <p class="text-muted small mb-3">
+                        Explore API endpoints, test requests and responses,
+                        and integrate external applications with Rajib Connect.
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small fw-semibold text-primary">
+                            Open API Documentation
+                        </span>
+                        <span class="text-primary">↗</span>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // LEAD STATUS CHART
+        const leadLabels = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.LeadLabels)
+        );
+
+        const leadValues = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.LeadValues)
+        );
+
+        new Chart(document.getElementById('leadChart'), {
+            type: 'doughnut',
+            data: {
+                labels: leadLabels,
+                datasets: [{
+                    label: 'Number of Leads',
+                    data: leadValues,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // OPPORTUNITY STAGE CHART
+        const opportunityLabels = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.OpportunityLabels)
+        );
+
+        const opportunityValues = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.OpportunityValues)
+        );
+
+        new Chart(document.getElementById('opportunityChart'), {
+            type: 'bar',
+            data: {
+                labels: opportunityLabels,
+                datasets: [{
+                    label: 'Number of Opportunities',
+                    data: opportunityValues,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+<style>
+    .welcome-panel {
+        background: linear-gradient(120deg, #14213d, #28527a);
+    }
+
+    .dashboard-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .module-card {
+        display: block;
+        height: 100%;
+        padding: 20px;
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        border-radius: 16px;
+        text-decoration: none;
+        color: #212529;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .module-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.10);
+        border-color: #0d6efd;
+        color: #212529;
+    }
+
+    .module-icon {
+        font-size: 30px;
+        margin-bottom: 8px;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+</style>

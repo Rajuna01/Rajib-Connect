@@ -1,0 +1,59 @@
+
+@model AcxiomCRM.ViewModels.AuditLogViewModel
+
+@{
+    ViewData["Title"] = "Audit Log Details";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Audit Log Details</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Back to Audit Logs
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">
+                Record #@Model.AuditLogId
+            </h5>
+
+            <dl class="row">
+                <dt class="col-md-3">User</dt>
+                <dd class="col-md-9">@Model.UserId</dd>
+
+                <dt class="col-md-3">Action</dt>
+                <dd class="col-md-9">@Model.Action</dd>
+
+                <dt class="col-md-3">Entity</dt>
+                <dd class="col-md-9">@Model.EntityName</dd>
+
+                <dt class="col-md-3">Record ID</dt>
+                <dd class="col-md-9">@(Model.RecordId?.ToString() ?? "-")</dd>
+
+                <dt class="col-md-3">Date & Time (UTC)</dt>
+                <dd class="col-md-9">
+                    @Model.CreatedDate.ToString("dd MMM yyyy HH:mm:ss")
+                </dd>
+
+                <dt class="col-md-3">IP Address</dt>
+                <dd class="col-md-9">@(Model.IpAddress ?? "-")</dd>
+
+                <dt class="col-md-3">Result</dt>
+                <dd class="col-md-9">@Model.Result</dd>
+            </dl>
+
+            <hr />
+
+            <h5 class="fw-bold mb-3">Old Value</h5>
+            <pre class="bg-light p-3 rounded text-wrap"><code>@(Model.OldValue ?? "No previous value recorded.")</code></pre>
+
+            <h5 class="fw-bold mb-3 mt-4">New Value</h5>
+            <pre class="bg-light p-3 rounded text-wrap"><code>@(Model.NewValue ?? "No new value recorded.")</code></pre>
+
+        </div>
+    </div>
+</div>

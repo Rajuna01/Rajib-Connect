@@ -1,0 +1,150 @@
+
+@model AcxiomCRM.ViewModels.AuditLogListViewModel
+
+@{
+    ViewData["Title"] = "Audit Logs";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Audit Logs</h2>
+            <p class="text-muted mb-0">
+                Monitor important actions performed in Rajib Connect.
+            </p>
+        </div>
+        <span class="badge bg-primary fs-6">
+            Total Records: @Model.TotalLogs
+        </span>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Search</label>
+                        <input type="text"
+                               name="searchTerm"
+                               value="@Model.SearchTerm"
+                               class="form-control"
+                               placeholder="Action, entity, user or IP address" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Action</label>
+                        <select name="actionFilter" class="form-select">
+                            <option value="">All Actions</option>
+                            @foreach (string action in ViewBag.Actions)
+                            {
+                                <option value="@action"
+                                        selected="@(Model.ActionFilter == action)">
+                                    @action
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Entity</label>
+                        <select name="entityFilter" class="form-select">
+                            <option value="">All Entities</option>
+                            @foreach (string entity in ViewBag.Entities)
+                            {
+                                <option value="@entity"
+                                        selected="@(Model.EntityFilter == entity)">
+                                    @entity
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Search
+                        </button>
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Reset
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">ID</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Entity</th>
+                            <th>Record ID</th>
+                            <th>Date & Time (UTC)</th>
+                            <th>Result</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.Logs.Any())
+                        {
+                            @foreach (var log in Model.Logs)
+                            {
+                                <tr>
+                                    <td class="ps-3">@log.AuditLogId</td>
+                                    <td>@log.UserId</td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            @log.Action
+                                        </span>
+                                    </td>
+                                    <td>@log.EntityName</td>
+                                    <td>@(log.RecordId?.ToString() ?? "-")</td>
+                                    <td>
+                                        @log.CreatedDate.ToString("dd MMM yyyy HH:mm:ss")
+                                    </td>
+                                    <td>
+                                        @if (log.Result == "Success")
+                                        {
+                                            <span class="badge bg-success">Success</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">@log.Result</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details"
+                                           asp-route-id="@log.AuditLogId"
+                                           class="btn btn-sm btn-outline-primary">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8"
+                                    class="text-center text-muted py-5">
+                                    No audit records found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Rajib Connect</title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/AcxiomCRM.styles.css"
+          asp-append-version="true" />
+
+    <style>
+        body {
+            background: #f5f7fb;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .crm-navbar {
+            background: #172554;
+            padding: 12px 0;
+            box-shadow: 0 3px 12px rgba(0,0,0,.12);
+        }
+
+        .crm-brand {
+            color: white !important;
+            font-size: 23px;
+            font-weight: 750;
+        }
+
+        .crm-navbar .nav-link {
+            color: #dbeafe !important;
+            font-weight: 500;
+            padding: 9px 12px !important;
+            border-radius: 7px;
+            margin: 0 2px;
+            transition: background 0.2s ease;
+        }
+
+        .crm-navbar .nav-link:hover {
+            background: #2563eb;
+            color: white !important;
+        }
+
+        .crm-navbar .navbar-toggler {
+            border-color: #64748b;
+        }
+
+        .crm-navbar .navbar-toggler-icon {
+            filter: brightness(0) invert(1);
+        }
+
+        .crm-main {
+            min-height: calc(100vh - 145px);
+        }
+
+        .crm-footer {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 18px 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <nav class="navbar navbar-expand-lg crm-navbar">
+        <div class="container-fluid px-lg-4">
+
+            <!-- BRAND -->
+            <a class="navbar-brand crm-brand"
+               asp-controller="Dashboard"
+               asp-action="Index">
+                Rajib Connect
+            </a>
+
+            <!-- MOBILE NAVIGATION BUTTON -->
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#crmNavigation"
+                    aria-controls="crmNavigation"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="crmNavigation">
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <!-- DASHBOARD -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Dashboard"
+                               asp-action="Index">
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <!-- CUSTOMERS -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Customer"
+                               asp-action="Index">
+                                Customers
+                            </a>
+                        </li>
+
+                        <!-- LEADS -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Lead"
+                               asp-action="Index">
+                                Leads
+                            </a>
+                        </li>
+
+                        <!-- OPPORTUNITIES -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Opportunity"
+                               asp-action="Index">
+                                Opportunities
+                            </a>
+                        </li>
+
+                        <!-- FOLLOW-UPS -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="FollowUp"
+                               asp-action="Index">
+                                Follow-ups
+                            </a>
+                        </li>
+
+                        <!-- ACTIVITIES -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Activity"
+                               asp-action="Index">
+                                Activities
+                            </a>
+                        </li>
+
+                        <!-- REPORTS -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Reports"
+                               asp-action="Index">
+                                Reports
+                            </a>
+                        </li>
+
+                        <!-- API DOCUMENTATION -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="/swagger/index.html"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                API Documentation
+                            </a>
+                        </li>
+
+                        <!-- USER MANAGEMENT: ADMIN ONLY -->
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="UserManagement"
+                                   asp-action="Index">
+                                    User Management
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
+                }
+
+                <!-- LOGIN / LOGOUT -->
+                <ul class="navbar-nav ms-auto">
+                    <partial name="_LoginPartial" />
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- MAIN CONTENT -->
+<main role="main" class="crm-main">
+    @RenderBody()
+</main>
+
+<!-- FOOTER -->
+<footer class="crm-footer">
+    <div class="container-fluid px-lg-4 d-flex flex-wrap
+                justify-content-between gap-2">
+        <span>© @DateTime.Now.Year Rajib Connect</span>
+        <span>Customer Relationship Management System</span>
+    </div>
+</footer>
+
+<!-- JAVASCRIPT -->
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+@await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

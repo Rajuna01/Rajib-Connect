@@ -1,0 +1,709 @@
+
+@model AcxiomCRM.ViewModels.ReportsViewModel
+
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Reports & Analytics";
+
+    var selectedPeriod = Model.Period switch
+    {
+        "Today" => "Today",
+        "This Week" => "Week",
+        "This Month" => "Month",
+        "This Year" => "Year",
+        "Custom Range" => "Custom",
+        _ => "All"
+    };
+
+    var monthlyLabels = Model.MonthlyTrends.Select(x => x.Label).ToArray();
+    var monthlyLeads = Model.MonthlyTrends.Select(x => x.Leads).ToArray();
+    var monthlyOpportunities = Model.MonthlyTrends.Select(x => x.Opportunities).ToArray();
+    var monthlyWonValues = Model.MonthlyTrends.Select(x => x.WonOpportunityValue).ToArray();
+
+    var executiveNames = Model.SalesExecutivePerformance.Select(x => x.Name).ToArray();
+    var executiveLeads = Model.SalesExecutivePerformance.Select(x => x.Leads).ToArray();
+    var executiveOpportunities = Model.SalesExecutivePerformance.Select(x => x.Opportunities).ToArray();
+    var executiveWonValues = Model.SalesExecutivePerformance.Select(x => x.WonValue).ToArray();
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Reports & Analytics</h2>
+            <p class="text-muted mb-0">
+                Monitor CRM performance, sales activities and business growth.
+            </p>
+        </div>
+
+        <a asp-controller="Reports"
+           asp-action="ExportCsv"
+           asp-route-period="@selectedPeriod"
+           asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+           class="btn btn-success">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+            Export CSV
+        </a>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-warning">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <!-- Date filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-controller="Reports"
+                  asp-action="Index"
+                  method="get"
+                  id="reportFilterForm">
+
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4 col-lg-3">
+                        <label for="period" class="form-label fw-semibold">
+                            Report Period
+                        </label>
+
+                        <select id="period"
+                                name="period"
+                                class="form-select">
+                            <option value="All" selected="@(selectedPeriod == "All")">
+                                All Time
+                            </option>
+                            <option value="Today" selected="@(selectedPeriod == "Today")">
+                                Today
+                            </option>
+                            <option value="Week" selected="@(selectedPeriod == "Week")">
+                                This Week
+                            </option>
+                            <option value="Month" selected="@(selectedPeriod == "Month")">
+                                This Month
+                            </option>
+                            <option value="Year" selected="@(selectedPeriod == "Year")">
+                                This Year
+                            </option>
+                            <option value="Custom" selected="@(selectedPeriod == "Custom")">
+                                Custom Range
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 custom-date-field">
+                        <label for="startDate" class="form-label fw-semibold">
+                            Start Date
+                        </label>
+                        <input type="date"
+                               id="startDate"
+                               name="startDate"
+                               class="form-control"
+                               value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <div class="col-md-3 custom-date-field">
+                        <label for="endDate" class="form-label fw-semibold">
+                            End Date
+                        </label>
+                        <input type="date"
+                               id="endDate"
+                               name="endDate"
+                               class="form-control"
+                               value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-funnel me-1"></i>
+                            Apply Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-3 text-muted small">
+                Showing report for:
+                <strong class="text-primary">@Model.Period</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer KPIs -->
+    <h5 class="fw-bold mb-3">Customer Overview</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Customers</div>
+                    <h3 class="fw-bold mb-0">@Model.TotalCustomers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Active Customers</div>
+                    <h3 class="fw-bold text-success mb-0">@Model.ActiveCustomers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Inactive Customers</div>
+                    <h3 class="fw-bold text-secondary mb-0">@Model.InactiveCustomers</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lead KPIs -->
+    <h5 class="fw-bold mb-3">Lead Overview</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Leads</div>
+                    <h3 class="fw-bold mb-0">@Model.TotalLeads</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Qualified Leads</div>
+                    <h3 class="fw-bold text-primary mb-0">@Model.QualifiedLeads</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Converted Leads</div>
+                    <h3 class="fw-bold text-success mb-0">@Model.ConvertedLeads</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Conversion Rate</div>
+                    <h3 class="fw-bold mb-0">@Model.LeadConversionRate.ToString("N2")%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="fw-bold">Lead Status Breakdown</h6>
+            <div class="row g-3 mt-1">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="text-muted small">New</div>
+                    <div class="fs-5 fw-semibold">@Model.NewLeads</div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="text-muted small">Contacted</div>
+                    <div class="fs-5 fw-semibold">@Model.ContactedLeads</div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="text-muted small">Qualified</div>
+                    <div class="fs-5 fw-semibold">@Model.QualifiedLeads</div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="text-muted small">Unqualified</div>
+                    <div class="fs-5 fw-semibold">@Model.UnqualifiedLeads</div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="text-muted small">Converted</div>
+                    <div class="fs-5 fw-semibold">@Model.ConvertedLeads</div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="text-muted small">Lost</div>
+                    <div class="fs-5 fw-semibold">@Model.LostLeads</div>
+                </div>
+            </div>
+            <hr />
+            <div class="text-muted small">Total Expected Lead Value</div>
+            <div class="fs-4 fw-bold">₹@Model.TotalLeadValue.ToString("N2")</div>
+        </div>
+    </div>
+
+    <!-- Opportunity KPIs -->
+    <h5 class="fw-bold mb-3">Opportunity & Sales Pipeline</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Opportunities</div>
+                    <h3 class="fw-bold mb-0">@Model.TotalOpportunities</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Open Opportunities</div>
+                    <h3 class="fw-bold text-primary mb-0">@Model.OpenOpportunities</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Won Opportunities</div>
+                    <h3 class="fw-bold text-success mb-0">@Model.WonOpportunities</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Lost Opportunities</div>
+                    <h3 class="fw-bold text-danger mb-0">@Model.LostOpportunities</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Open Pipeline Value</div>
+                    <h4 class="fw-bold mb-0">₹@Model.TotalPipelineValue.ToString("N2")</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Weighted Pipeline Value</div>
+                    <h4 class="fw-bold text-primary mb-0">₹@Model.WeightedPipelineValue.ToString("N2")</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Won Revenue</div>
+                    <h4 class="fw-bold text-success mb-0">₹@Model.WonRevenue.ToString("N2")</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Follow-up and activity KPIs -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Follow-up Overview</h5>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-muted small">Total</div>
+                            <div class="fs-4 fw-bold">@Model.TotalFollowUps</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted small">Planned</div>
+                            <div class="fs-4 fw-bold text-primary">@Model.PlannedFollowUps</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted small">Completed</div>
+                            <div class="fs-4 fw-bold text-success">@Model.CompletedFollowUps</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted small">Missed</div>
+                            <div class="fs-4 fw-bold text-danger">@Model.MissedFollowUps</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted small">Cancelled</div>
+                            <div class="fs-4 fw-bold text-secondary">@Model.CancelledFollowUps</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Activity Overview</h5>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-muted small">Total Activities</div>
+                            <div class="fs-4 fw-bold">@Model.TotalActivities</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted small">Planned</div>
+                            <div class="fs-4 fw-bold text-primary">@Model.PlannedActivities</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted small">Completed</div>
+                            <div class="fs-4 fw-bold text-success">@Model.CompletedActivities</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted small">Cancelled</div>
+                            <div class="fs-4 fw-bold text-secondary">@Model.CancelledActivities</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <h5 class="fw-bold mb-3">Visual Analytics</h5>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Lead Status Distribution</h6>
+                    <div style="height:300px;">
+                        <canvas id="leadStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Opportunity Status Distribution</h6>
+                    <div style="height:300px;">
+                        <canvas id="opportunityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Follow-up Status Distribution</h6>
+                    <div style="height:300px;">
+                        <canvas id="followUpChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Activity Status Distribution</h6>
+                    <div style="height:300px;">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly trends -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Monthly Business Trends</h5>
+
+            @if (Model.MonthlyTrends.Any())
+            {
+                <div style="height:350px;">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+
+                <div class="table-responsive mt-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Month</th>
+                                <th>Leads</th>
+                                <th>Opportunities</th>
+                                <th>Won Opportunity Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.MonthlyTrends)
+                            {
+                                <tr>
+                                    <td>@item.Label</td>
+                                    <td>@item.Leads</td>
+                                    <td>@item.Opportunities</td>
+                                    <td>₹@item.WonOpportunityValue.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">No monthly trend data is available for this period.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Sales executive performance -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Sales Executive Performance</h5>
+
+            @if (Model.SalesExecutivePerformance.Any())
+            {
+                <div style="height:350px;" class="mb-4">
+                    <canvas id="executivePerformanceChart"></canvas>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sales Executive</th>
+                                <th>Leads</th>
+                                <th>Opportunities</th>
+                                <th>Won Opportunities</th>
+                                <th>Pipeline Value</th>
+                                <th>Won Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.SalesExecutivePerformance)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.Name</td>
+                                    <td>@item.Leads</td>
+                                    <td>@item.Opportunities</td>
+                                    <td>@item.WonOpportunities</td>
+                                    <td>₹@item.PipelineValue.ToString("N2")</td>
+                                    <td class="text-success fw-semibold">
+                                        ₹@item.WonValue.ToString("N2")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    No Sales Executive performance data is available for this period.
+                </p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Show custom date fields only for the Custom Range option.
+        const periodSelect = document.getElementById("period");
+        const customDateFields = document.querySelectorAll(".custom-date-field");
+        const startDateInput = document.getElementById("startDate");
+        const endDateInput = document.getElementById("endDate");
+
+        function updateCustomDateFields() {
+            const isCustom = periodSelect.value === "Custom";
+
+            customDateFields.forEach(field => {
+                field.style.display = isCustom ? "" : "none";
+            });
+
+            startDateInput.disabled = !isCustom;
+            endDateInput.disabled = !isCustom;
+        }
+
+        periodSelect.addEventListener("change", updateCustomDateFields);
+        updateCustomDateFields();
+
+        document.getElementById("reportFilterForm").addEventListener("submit", function (event) {
+            if (periodSelect.value === "Custom" &&
+                startDateInput.value &&
+                endDateInput.value &&
+                endDateInput.value < startDateInput.value) {
+
+                event.preventDefault();
+                alert("End Date must be on or after Start Date.");
+            }
+        });
+
+        // Chart data generated from the strongly typed view model.
+        const leadLabels = ["New", "Contacted", "Qualified", "Unqualified", "Converted", "Lost"];
+        const leadValues = [
+            @Model.NewLeads,
+            @Model.ContactedLeads,
+            @Model.QualifiedLeads,
+            @Model.UnqualifiedLeads,
+            @Model.ConvertedLeads,
+            @Model.LostLeads
+        ];
+
+        const opportunityLabels = ["Open", "Won", "Lost"];
+        const opportunityValues = [
+            @Model.OpenOpportunities,
+            @Model.WonOpportunities,
+            @Model.LostOpportunities
+        ];
+
+        const followUpLabels = ["Planned", "Completed", "Missed", "Cancelled"];
+        const followUpValues = [
+            @Model.PlannedFollowUps,
+            @Model.CompletedFollowUps,
+            @Model.MissedFollowUps,
+            @Model.CancelledFollowUps
+        ];
+
+        const activityLabels = ["Planned", "Completed", "Cancelled"];
+        const activityValues = [
+            @Model.PlannedActivities,
+            @Model.CompletedActivities,
+            @Model.CancelledActivities
+        ];
+
+        const monthlyLabels = @Html.Raw(JsonSerializer.Serialize(monthlyLabels));
+        const monthlyLeads = @Html.Raw(JsonSerializer.Serialize(monthlyLeads));
+        const monthlyOpportunities = @Html.Raw(JsonSerializer.Serialize(monthlyOpportunities));
+        const monthlyWonValues = @Html.Raw(JsonSerializer.Serialize(monthlyWonValues));
+
+        const executiveNames = @Html.Raw(JsonSerializer.Serialize(executiveNames));
+        const executiveLeads = @Html.Raw(JsonSerializer.Serialize(executiveLeads));
+        const executiveOpportunities = @Html.Raw(JsonSerializer.Serialize(executiveOpportunities));
+        const executiveWonValues = @Html.Raw(JsonSerializer.Serialize(executiveWonValues));
+
+        function createDoughnutChart(elementId, labels, values) {
+            const canvas = document.getElementById(elementId);
+
+            if (!canvas) return;
+
+            new Chart(canvas, {
+                type: "doughnut",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "bottom"
+                        }
+                    }
+                }
+            });
+        }
+
+        createDoughnutChart("leadStatusChart", leadLabels, leadValues);
+        createDoughnutChart("opportunityChart", opportunityLabels, opportunityValues);
+        createDoughnutChart("followUpChart", followUpLabels, followUpValues);
+        createDoughnutChart("activityChart", activityLabels, activityValues);
+
+        const monthlyCanvas = document.getElementById("monthlyTrendChart");
+
+        if (monthlyCanvas) {
+            new Chart(monthlyCanvas, {
+                type: "line",
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [
+                        {
+                            label: "Leads",
+                            data: monthlyLeads,
+                            tension: 0.3
+                        },
+                        {
+                            label: "Opportunities",
+                            data: monthlyOpportunities,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "bottom"
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const executiveCanvas = document.getElementById("executivePerformanceChart");
+
+        if (executiveCanvas && executiveNames.length > 0) {
+            new Chart(executiveCanvas, {
+                type: "bar",
+                data: {
+                    labels: executiveNames,
+                    datasets: [
+                        {
+                            label: "Leads",
+                            data: executiveLeads
+                        },
+                        {
+                            label: "Opportunities",
+                            data: executiveOpportunities
+                        },
+                        {
+                            label: "Won Value",
+                            data: executiveWonValues,
+                            yAxisID: "y1"
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "bottom"
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            position: "left"
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: "right",
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}

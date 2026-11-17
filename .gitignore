@@ -1,0 +1,55 @@
+﻿# .NET / Visual Studio
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# SQLite databases and backups
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.bak
+
+# Configuration and secrets
+**/appsettings.Development.json
+**/secrets.json
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+
+# Python
+**/.venv/
+**/venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Logs and temporary files
+*.log
+logs/
+temp/
+tmp/
+*.tmp
+
+# Operating system
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+
+# Python backup files
+*_backup.py
+*.bak
+
+# Frontend source maps
+*.map

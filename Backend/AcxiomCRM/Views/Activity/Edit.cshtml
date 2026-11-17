@@ -1,0 +1,173 @@
+
+@model AcxiomCRM.ViewModels.ActivityViewModel
+
+@{
+    ViewData["Title"] = "Edit Activity";
+    bool canAssign = User.IsInRole("Admin") || User.IsInRole("Manager");
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">Edit Activity</h2>
+        <p class="text-muted">Update activity information.</p>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+
+            <form asp-action="Edit"
+                  asp-route-id="@Model.ActivityId"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="ActivityId" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger"></div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="Subject" class="form-label">
+                            Activity Subject
+                        </label>
+
+                        <input asp-for="Subject" class="form-control" />
+
+                        <span asp-validation-for="Subject"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ActivityType" class="form-label">
+                            Activity Type
+                        </label>
+
+                        <select asp-for="ActivityType" class="form-select">
+                            <option value="Call">Call</option>
+                            <option value="Meeting">Meeting</option>
+                            <option value="Email">Email</option>
+                            <option value="Task">Task</option>
+                        </select>
+
+                        <span asp-validation-for="ActivityType"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ActivityDate" class="form-label">
+                            Activity Date
+                        </label>
+
+                        <input asp-for="ActivityDate"
+                               type="date"
+                               asp-format="{0:yyyy-MM-dd}"
+                               class="form-control" />
+
+                        <span asp-validation-for="ActivityDate"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label">
+                            Activity Status
+                        </label>
+
+                        <select asp-for="Status" class="form-select">
+                            <option value="Planned">Planned</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+
+                        <span asp-validation-for="Status"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CustomerId" class="form-label">
+                            Customer
+                        </label>
+
+                        <select asp-for="CustomerId"
+                                asp-items="Model.Customers"
+                                class="form-select">
+                            <option value="">-- Select Customer (Optional) --</option>
+                        </select>
+
+                        <span asp-validation-for="CustomerId"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LeadId" class="form-label">
+                            Lead
+                        </label>
+
+                        <select asp-for="LeadId"
+                                asp-items="Model.Leads"
+                                class="form-select">
+                            <option value="">-- Select Lead (Optional) --</option>
+                        </select>
+
+                        <span asp-validation-for="LeadId"
+                              class="text-danger"></span>
+                    </div>
+
+                    @if (canAssign)
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="AssignedTo" class="form-label">
+                                Assign to Sales Executive
+                            </label>
+
+                            <select asp-for="AssignedTo"
+                                    asp-items="Model.SalesExecutives"
+                                    class="form-select">
+                                <option value="">-- Select Sales Executive --</option>
+                            </select>
+
+                            <span asp-validation-for="AssignedTo"
+                                  class="text-danger"></span>
+                        </div>
+                    }
+
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label">
+                            Description
+                        </label>
+
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="4"></textarea>
+
+                        <span asp-validation-for="Description"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+
+                    <button type="submit" class="btn btn-primary">
+                        Save Changes
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
